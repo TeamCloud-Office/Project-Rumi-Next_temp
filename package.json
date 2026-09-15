@@ -1,0 +1,19 @@
+{
+  "name": "project-rumi-next",
+  "version": "0.1.0",
+  "private": true,
+  "description": "KakaoTalk chatbot powered by Iris",
+  "main": "src/Main.js",
+  "scripts": {
+    "start": "node src/Main.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "json-bigint": "^1.0.0"
+  }
+}
