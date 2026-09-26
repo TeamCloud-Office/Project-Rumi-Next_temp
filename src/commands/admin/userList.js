@@ -1,0 +1,3 @@
+const { isAdmin } = require("./_helpers");
+const pattern = /^(?:유저\s*목록|사용자\s*목록|멤버\s*목록)\s+(.+)$/;
+module.exports = { name: "userList", matches: async ctx => ctx.hasPrefix && pattern.test(ctx.command) && await isAdmin(ctx), async execute(ctx) { const channelId = ctx.command.match(pattern)[1].trim(); if (!await ctx.userLogRepository.hasChannel(channelId)) return ctx.send("로그 데이터가 없어요."); const rows = await ctx.userLogRepository.list(channelId); await ctx.send([`유저 목록이에요. (${rows.length}명)`, ctx.config.more, "", ...rows.map(row => { let chat = {}; try { chat = JSON.parse(row.chat || "{}"); } catch {} return `${row.name} ( ${row.userId} )\n\t채팅 횟수: ${Number(chat.count || 0)}회\n\t메모: ${row.memo || "없음"}`; })].join("\n\n")); return true; } };

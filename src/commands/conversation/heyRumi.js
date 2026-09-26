@@ -1,0 +1,1 @@
+module.exports = { name: "heyRumi", matches: ctx => ctx.hasPrefix, async execute(ctx) { if (!await ctx.rentalService.check()) return false; const answer = await ctx.conversationService.answer(ctx.command); if (!answer) return false; for (const item of String(answer).split("\n")) if (item) await ctx.send(item); return true; } };

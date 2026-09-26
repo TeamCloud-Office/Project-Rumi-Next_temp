@@ -15,5 +15,8 @@ module.exports = function readEnv(env = process.env) {
     irisBaseUrl: url.href.replace(/\/$/, ""),
     irisTimeoutMs: integer(env.IRIS_TIMEOUT_MS, defaults.irisTimeoutMs, "IRIS_TIMEOUT_MS"),
     commandPrefixes: [...defaults.commandPrefixes],
+    devChannelId: String(env.DEV_CHANNEL_ID || defaults.devChannelId),
+    enableEval: String(env.ENABLE_EVAL || "false").toLowerCase() === "true",
+    watcherIntervalMs: integer(env.WATCHER_INTERVAL_MS, defaults.watcherIntervalMs, "WATCHER_INTERVAL_MS"),
   };
 };

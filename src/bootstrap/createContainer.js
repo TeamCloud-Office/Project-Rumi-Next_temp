@@ -7,13 +7,57 @@ const CommandParser = require("../core/CommandParser");
 const CommandManager = require("../core/CommandManager");
 const ContextFactory = require("../core/ContextFactory");
 const EventManager = require("../core/EventManager");
+const DatabaseRegistry = require("../database/DatabaseRegistry");
+const UserRepository = require("../database/repositories/UserRepository");
+const ChannelRepository = require("../database/repositories/ChannelRepository");
+const AttendanceRepository = require("../database/repositories/AttendanceRepository");
+const UserLogRepository = require("../database/repositories/UserLogRepository");
+const MessageRepository = require("../database/repositories/MessageRepository");
+const MagicAnswerRepository = require("../database/repositories/MagicAnswerRepository");
+const BeraRepository = require("../database/repositories/BeraRepository");
+const StockRepository = require("../database/repositories/StockRepository");
+const TransferService = require("../services/account/TransferService");
+const UserLookupService = require("../services/account/UserLookupService");
+const UserSelectionService = require("../services/account/UserSelectionService");
+const MemberMemoService = require("../services/channel/MemberMemoService");
+const UserAdminService = require("../services/admin/UserAdminService");
+const ChannelAdminService = require("../services/admin/ChannelAdminService");
+const BroadcastService = require("../services/admin/BroadcastService");
+const WeatherService = require("../services/tools/WeatherService");
+const MusicService = require("../services/tools/MusicService");
+const DictionaryService = require("../services/tools/DictionaryService");
+const NaverWeatherClient = require("../integrations/weather/NaverWeatherClient");
+const MelonClient = require("../integrations/music/MelonClient");
+const KoreanDictionaryClient = require("../integrations/dictionary/KoreanDictionaryClient");
+const loadPrivateKeys = require("../config/privateKeyLoader");
 module.exports = function createContainer({ config = new Config(), replyClient } = {}) {
   const irisClient = new IrisClient(config);
+  const registry = new DatabaseRegistry();
   const container = {
     config, irisClient, replyClient: replyClient || new IrisReplyClient(irisClient),
     queryClient: new IrisQueryClient(irisClient), commandParser: new CommandParser(config.commandPrefixes),
-    commandManager: new CommandManager(), events: new EventManager(),
+    commandManager: new CommandManager(), events: new EventManager(), registry,
   };
+  container.userRepository = new UserRepository({ registry, paths: config.paths });
+  container.channelRepository = new ChannelRepository({ registry, paths: config.paths });
+  container.attendanceRepository = new AttendanceRepository({ registry, paths: config.paths });
+  container.userLogRepository = new UserLogRepository({ registry, paths: config.paths });
+  container.messageRepository = new MessageRepository({ registry, paths: config.paths });
+  container.magicAnswerRepository = new MagicAnswerRepository({ paths: config.paths });
+  container.beraRepository = new BeraRepository({ registry, paths: config.paths });
+  container.stockRepository = new StockRepository({ registry, paths: config.paths });
+  container.transferService = new TransferService({ userRepository: container.userRepository, config });
+  container.lookupService = new UserLookupService(container.userRepository);
+  container.selectionService = new UserSelectionService();
+  container.memberMemoService = new MemberMemoService(container.userLogRepository);
+  container.userAdminService = new UserAdminService({ userRepository: container.userRepository, lookupService: container.lookupService });
+  container.channelAdminService = new ChannelAdminService(container.channelRepository);
+  container.broadcastService = new BroadcastService({ channelRepository: container.channelRepository, replyClient: container.replyClient });
+  const keys = loadPrivateKeys(config.paths.root);
+  container.weatherService = new WeatherService(new NaverWeatherClient());
+  container.musicService = new MusicService(new MelonClient());
+  container.dictionaryClient = new KoreanDictionaryClient({ apiKey: keys.KRDICT_API_KEY });
+  container.dictionaryService = new DictionaryService(container.dictionaryClient);
   container.irisGateway = new IrisGateway(container.queryClient);
   container.contextFactory = new ContextFactory(container);
   return container;

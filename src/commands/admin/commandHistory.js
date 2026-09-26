@@ -1,0 +1,5 @@
+const UserService = require("../../services/account/UserService");
+const UserLogService = require("../../services/logging/UserLogService");
+const { isAdmin } = require("./_helpers");
+const pattern = /^(?:(?:command\s*history|commandhistory|(?:명령어|명령|커맨드)\s*(?:사용\s*)?(?:기록|내역|이력))\s+(\d+)\s+(\S+)|(\d+)\s+(\S+)\s+(?:command\s*history|commandhistory|(?:명령어|명령|커맨드)\s*(?:사용\s*)?(?:기록|내역|이력)))$/i;
+module.exports = { name: "commandHistory", matches: async ctx => ctx.hasPrefix && pattern.test(ctx.command) && await isAdmin(ctx), async execute(ctx) { const m = ctx.command.match(pattern), channelId = m[1] || m[3], value = m[2] || m[4]; const target = await ctx.userAdminService.resolve(channelId, value); if (!target || !await ctx.userLogRepository.hasChannel(channelId)) return ctx.send("사용자 로그를 찾을 수 없어요."); const service = new UserService({ repository: ctx.userRepository, channelId, userId: target.user.privateId }); const log = new UserLogService({ repository: ctx.userLogRepository, userService: service, channelId, userId: target.user.privateId }); ctx.excludeCommandResponsesFromHistory = true; await ctx.send(await log.commandHistoryText()); return true; } };

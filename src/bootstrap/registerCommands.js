@@ -1,2 +1,45 @@
-// Register only implemented commands; attendance needs its repositories first.
-module.exports = ({ commandManager }) => commandManager.register(require("../commands/system/ping"));
+const commands = [
+  "../commands/system/ping",
+  "../commands/conversation/magicAnswer",
+  "../commands/account/userSelection",
+  "../commands/channel/requestRegistration",
+  "../commands/channel/channelInfo",
+  "../commands/channel/previousMessage",
+  "../commands/channel/nicknameHistory",
+  "../commands/channel/deleteMemberMemo",
+  "../commands/channel/setMemberMemo",
+  "../commands/channel/memberInfo",
+  "../commands/channel/featureToggle",
+  "../commands/account/userInfo",
+  "../commands/account/userLookup",
+  "../commands/account/transfer",
+  "../commands/tools/dictionary",
+  "../commands/tools/weather",
+  "../commands/tools/music",
+  "../commands/games/attendance",
+  "../commands/games/gambling",
+  "../commands/games/numberBaseball",
+  "../commands/games/experimental/bera31",
+  "../commands/games/experimental/stock",
+  "../commands/games/experimental/wordChain",
+  "../commands/conversation/ranking",
+  "../commands/conversation/help",
+  "../commands/admin/broadcast",
+  "../commands/admin/commandHistory",
+  "../commands/admin/channelId",
+  "../commands/admin/starRanking",
+  "../commands/admin/setAdmin",
+  "../commands/admin/setBan",
+  "../commands/admin/setWarning",
+  "../commands/admin/registerRental",
+  "../commands/admin/adjustStar",
+  "../commands/admin/userInfo",
+  "../commands/admin/channelList",
+  "../commands/admin/userList",
+  "../commands/admin/eval",
+  "../commands/conversation/heyRumi",
+];
+
+module.exports = ({ commandManager }) => {
+  for (const command of commands) commandManager.register(require(command));
+};

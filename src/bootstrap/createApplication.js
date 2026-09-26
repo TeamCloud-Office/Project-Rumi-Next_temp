@@ -8,5 +8,8 @@ module.exports = function createApplication(options = {}) {
   require("./registerCommands")(container);
   require("./registerEvents")(container);
   require("./registerRoutes")(app, { ...container, bot });
+  const watchers = require("./startWatchers")(container);
+  bot.onStart(() => watchers.start());
+  bot.onStop(() => watchers.stop());
   return { app, bot, container };
 };
