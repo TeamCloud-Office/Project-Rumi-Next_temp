@@ -1,0 +1,5 @@
+const { isCommand } = require("../../utils/CommandUtils");
+const chartAliases = ["멜론 차트", "멜론차트", "멜론 차트 알려줘", "멜론차트 알려줘", "멜론 순위", "멜론 순위 알려줘", "음악 차트", "음악 차트 알려줘", "노래 순위", "노래 순위 알려줘", "멜론 TOP30", "멜론 TOP 30", "멜론 탑30", "멜론 탑 30"];
+const patterns = [/^(.+?)\s*(?:음악|노래|곡)\s*(?:찾아줘|찾아주세요|검색해줘|검색해주세요|검색|틀어줘|알려줘)$/, /^(?:음악|노래|곡)\s*(?:검색|찾기)?\s+(.+?)(?:\s*(?:찾아줘|찾아주세요|검색해줘|검색해주세요|틀어줘))?$/];
+const find = value => patterns.map(pattern => value.match(pattern)).find(Boolean);
+module.exports = { name: "music", matches: ctx => ctx.hasPrefix && (isCommand(ctx.command, chartAliases) || Boolean(find(ctx.command))), async execute(ctx) { if (!await ctx.executionPolicy.allows("music")) return true; try { if (isCommand(ctx.command, chartAliases)) { ctx.commandHistoryDescription = "음악 차트 조회"; await ctx.send(await ctx.musicService.chart()); } else { const keyword = find(ctx.command)[1].trim(); ctx.commandHistoryDescription = `음악 검색 - ${keyword}`; await ctx.send(await ctx.musicService.search(keyword)); } } catch (error) { await ctx.send(`음악 정보를 불러오지 못했어요.\n${error.message}`); } return true; } };

@@ -14,7 +14,7 @@ async function main() {
       process.exit(1);
     }, 6000);
     timer.unref();
-    try { await application.bot.stop(); }
+    try { await application.bot.stop(); application.container.registry.close(); }
     catch (error) { console.error("Shutdown failed:", error); process.exitCode = 1; }
     finally {
       clearTimeout(timer);

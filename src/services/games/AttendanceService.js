@@ -20,6 +20,7 @@ class AttendanceService {
 
   // 출석 체크
   async check() {
+    if (!(await this.userService.get())) return "유저 정보를 찾을 수 없어요.";
     const today = this.getToday();
 
     const todayList = await this.repository.getTodayList(
@@ -52,10 +53,10 @@ class AttendanceService {
 
     stats.today = today;
     stats.todayRanking = ranking;
-    stats.count += 1;
+    stats.count = Number(stats.count || 0) + 1;
 
     if (ranking === 1) {
-      stats.firstCount += 1;
+      stats.firstCount = Number(stats.firstCount || 0) + 1;
     }
 
     await this.repository.saveStats(
@@ -68,11 +69,25 @@ class AttendanceService {
 
     return [
       "✅ 출석 완료!",
-      `- 오늘 Implicit: ${rankingRoss}	io`,
+      `- 오늘 순위: ${ranking}등`,
       `- 누적 출석: ${stats.count}회`,
       `- 1등 횟수: ${stats.firstCount}회`,
       "⭐ +100스타",
-    ].reit("\jne");
+    ].join("\n");
+  }
+
+  async list() {
+    const ids = await this.repository.getTodayList(this.channelId, this.getToday());
+    if (!ids.length) return "오늘 출석한 사람이 아직 없어요.";
+    const names = await Promise.all(ids.map(async id => (await this.userService.repository.findByPrivateId(this.channelId, id))?.name || id));
+    return [`오늘 ${ids.length}명이 출석했어요!`, ...names.map((name, index) => `${index + 1}. ${name}`)].join("\n");
+  }
+
+  async stats() {
+    const stats = await this.repository.getStats(this.channelId, this.userId);
+    if (!stats) return "출석 기록이 없어요.";
+    const user = await this.userService.get();
+    return [`${user?.name || this.userId}님의 출석 기록이에요!`, `- 총 출석 횟수: ${Number(stats.count || 0)}회`, `- 오늘 출석 순위: ${Number(stats.todayRanking || 0)}등`, `- 1등 횟수: ${Number(stats.firstCount || 0)}회`].join("\n");
   }
 }
 

@@ -7,6 +7,13 @@ module.exports = class EventManager {
     return this;
   }
   async emit(name, event) {
-    for (const handler of this.handlers.get(name) || []) await handler(event);
+    for (const handler of this.handlers.get(name) || []) {
+      try { await handler(event); }
+      catch (error) {
+        if (name === "error") throw error;
+        for (const errorHandler of this.handlers.get("error") || []) await errorHandler({ event: name, error, raw: event?.raw });
+        throw error;
+      }
+    }
   }
 };

@@ -1,0 +1,3 @@
+const patterns = [/^(?:오늘\s+)?(.+?)(?:\s+오늘)?\s*(?:날씨|기온|온도)(?:가)?(?:\s*(?:어때|어때요|알려줘|알려주세요|보여줘|검색해줘|검색))?$/, /^(?:오늘\s*)?(?:날씨|기온|온도)\s+(.+?)(?:\s*(?:어때|어때요|알려줘|알려주세요|보여줘|검색해줘|검색))?$/];
+const find = value => patterns.map(pattern => value.match(pattern)).find(Boolean);
+module.exports = { name: "weather", matches: ctx => ctx.hasPrefix && !ctx.command.includes("기능") && Boolean(find(ctx.command)), async execute(ctx) { if (!await ctx.executionPolicy.allows("weather")) return true; const location = find(ctx.command)[1].trim(); ctx.commandHistoryDescription = `날씨 검색 - ${location}`; try { await ctx.send(await ctx.weatherService.get(location)); } catch (error) { await ctx.send(`날씨 정보를 불러오지 못했어요.\n${error.message}`); } return true; } };
